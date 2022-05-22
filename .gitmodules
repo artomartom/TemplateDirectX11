@@ -1,7 +1,3 @@
 [submodule "Source/Hello"]
 	path = Source/Hello
 	url = https://github.com/artomartom/Hello.git
-<<<<<<< HEAD
-=======
-	branch = main
->>>>>>> 32eaa4271f365abafd0f045cf1d019a4c88e3023
