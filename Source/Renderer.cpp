@@ -36,7 +36,7 @@ HRESULT Renderer::Initialize()
         return hr;
     if (H_FAIL(hr = m_pDeviceResource->CreatePixelShaderFromFile(L"Pixel.so", &m_pPixelShader)))
         return hr;
-    
+
     /**
      *     Create Constant Buffers
      */
@@ -102,7 +102,7 @@ void Renderer::UpdateFrameBuffer() noexcept
 {
 
     // Update Timer
-    m_timer.Count ();
+    m_timer.Count();
     FrameBuffer constantBuffer(m_timer.GetCount<long long>(), m_timer.GetDelta<double>());
     m_pContext->UpdateSubresource(
         m_pFrameBuffer.Get(),

@@ -46,7 +46,7 @@ public:
   {
     HRESULT hr{};
 
-    SIZE RTSize{RECTWIDTH(args.Rect), RECTHEIGHT(args.Rect)};
+    SIZE RTSize{RECTWIDTH(args.rect), RECTHEIGHT(args.rect)};
     m_pDeviceResource = std::make_unique<DeviceResource>(&m_pContext, &hr);
     if (H_OK(hr))
     {
