@@ -1,5 +1,6 @@
 Source/Shader/Release/
 Source/Shader/Debug/
+Build/
 Log.txt
 CompileShaders.ps1
 .vscode/ 
