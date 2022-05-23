@@ -1,15 +1,11 @@
 Source/Shader/Release/
 Source/Shader/Debug/
 Build/
-<<<<<<< HEAD
+ 
 imgui.ini
 Log.txt
 CompileShaders.ps1
 compileShaderbyHand.ps1
-=======
-Log.txt
-CompileShaders.ps1
->>>>>>> 94a7623b907d4d4aaa52d7638bf765786949f94f
 .vscode/ 
 .PSBC
 Log.txt
