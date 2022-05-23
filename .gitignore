@@ -1,7 +1,6 @@
 Source/Shader/Release/
 Source/Shader/Debug/
 Build/
- 
 imgui.ini
 Log.txt
 CompileShaders.ps1
