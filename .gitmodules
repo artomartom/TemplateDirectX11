@@ -1,9 +1,3 @@
 [submodule "Source/Hello"]
 	path = Source/Hello
-	url = https://github.com/artomartom/Hello.git
-<<<<<<< HEAD
-[submodule "Source/ImGui"]
-	path = Source/ImGui
-	url = https://github.com/ocornut/imgui.git
-=======
->>>>>>> 94a7623b907d4d4aaa52d7638bf765786949f94f
+	url = https://github.com/artomartom/Hello.git 
