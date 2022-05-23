@@ -1,10 +1,15 @@
 Source/Shader/Release/
 Source/Shader/Debug/
 Build/
+<<<<<<< HEAD
 imgui.ini
 Log.txt
 CompileShaders.ps1
 compileShaderbyHand.ps1
+=======
+Log.txt
+CompileShaders.ps1
+>>>>>>> 94a7623b907d4d4aaa52d7638bf765786949f94f
 .vscode/ 
 .PSBC
 Log.txt
@@ -433,4 +438,8 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
+<<<<<<< HEAD
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,cmake
+=======
+# End of https://www.toptal.com/developers/gitignore/api/visualstudio,cmake
+>>>>>>> 94a7623b907d4d4aaa52d7638bf765786949f94f
