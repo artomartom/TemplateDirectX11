@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
-project(ImGuiTest)
+project(TemplateDirectX11)
 set(CMAKE_CXX_STANDARD 20)
 file (GLOB SOURCES "./*.cpp" )
 add_executable(${PROJECT_NAME} ${SOURCES} )
- 
 option(MAKEGUI "build  as a GUI rather then console app" ON)
-
-
  
 if(MAKEGUI)
   set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -33,12 +30,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   /external:W0
   )
   endif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+target_link_libraries(${PROJECT_NAME} PUBLIC D3D11 DXGI dxguid d3dcompiler )
+target_precompile_headers(${PROJECT_NAME} PUBLIC pch.hpp)
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/Wnded)
+target_link_libraries(${PROJECT_NAME} PUBLIC Wnded_s)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/ImGui)
 file (GLOB IMGUISOURCES "./ImGui/*.cpp" )
 add_library(ImGui_s STATIC  ${IMGUISOURCES}   )
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui_s)
-target_link_libraries(${PROJECT_NAME} PUBLIC D3D11 DXGI dxguid d3dcompiler )
-target_precompile_headers(${PROJECT_NAME} PUBLIC pch.hpp)
  

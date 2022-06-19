@@ -3,8 +3,6 @@ Source/Shader/Debug/
 Build/
 imgui.ini
 Log.txt
-CompileShaders.ps1
-compileShaderbyHand.ps1
 .vscode/ 
 .PSBC
 Log.txt

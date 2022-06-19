@@ -3,6 +3,7 @@
 #define PCH_HPP
  
 #include "Hello/Hello.hpp"
+#include "Wnded/Window.hpp"
 #include <wrl/client.h>
 #include <d3d11.h>
 #include <memory>

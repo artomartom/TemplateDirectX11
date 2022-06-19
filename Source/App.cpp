@@ -1,166 +1,131 @@
 #pragma once
 
 #include "pch.hpp"
-#include "Renderer.hpp"
+
 #include "DeviceResource.hpp"
+#include "TargetWindow.hpp"
 
 #ifndef IMGUI_DISABLE
-#include "ImGuiMngr.hpp"
+#include "ImGui//imgui.h"
+#include "ImGui//imgui_impl_win32.h"
+#include "ImGui//imgui_impl_dx11.h"
 #endif // IMGUI_DISABLE
 
-#define CASE(message, action) \
-  case message:               \
-    action;                   \
-    break
-
+using namespace Window;
 using ::Microsoft::WRL::ComPtr;
 
-class App : public CoreApp, public Renderer
-{
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+class lolez : public Window::Impl
+{
+public:
+  void init(ID3D11Device *pDevice, ID3D11DeviceContext *pContext)
+  {
+    m_pDevice = pDevice;
+    m_pContext = pContext;
+    // if (H_FAIL(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, 0, 0, 0, D3D11_SDK_VERSION, &m_pDevice, 0, &m_pContext)))
+    //   return;
+
+    ::SetWindowLongPtrW(Handle::Get(), (-4), (LONG_PTR)ImGui_ImplWin32_WndProcHandler); // GWL_WNDPROC
+    ::SetWindowPos(Handle::Get(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    // ImGui::StyleColorsDark();
+    ImGui::StyleColorsClassic();
+    ImGui_ImplWin32_Init(Handle::Get());
+    ImGui_ImplDX11_Init(m_pDevice, m_pContext);
+    m_ready = true;
+  };
+
+  template <typename Func>
+  void RenderFrame(Func func)
+  {
+    static bool show_demo_window{};
+    using namespace ImGui;
+    // Start the Dear ImGui frame
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    NewFrame();
+
+    //    SetNextWindowSize(ImVec2(m_rect.right, m_rect.bottom));
+    func();
+
+    Render();
+    ImGui_ImplDX11_RenderDrawData(GetDrawData());
+  };
+
+  ~lolez()
+  {
+    if (Handle::Get() != 0)
+    {
+      ImGui_ImplDX11_Shutdown();
+      ImGui_ImplWin32_Shutdown();
+      ImGui::DestroyContext();
+      ::DestroyWindow(Handle::Get());
+      ::UnregisterClassW(L"IMGUI class", 0);
+    };
+    
+  }
+
+private:
+  ID3D11Device *m_pDevice{};
+  ID3D11DeviceContext *m_pContext{};
+
+  bool m_done{false};
+  bool m_ready{false};
+};
+
+class App : public Impl
+{
 public:
   App()
   {
-    //    m_style|= WS_CLIPCHILDREN;//Excludes the area occupied by child windows when drawing occurs within the parent window.
-  }
+    InitWindow(RECT{100, 100, 800, 1000}, nullptr, this);
+    InitWindow(RECT{200, 300, 500, 600}, this, &m_target);
+    m_shouldClose = m_target.m_shouldClose;
+  };
+
   static int AppEntry(HINSTANCE hinst)
   {
     DBG_ONLY(_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF));
-    peekRun(Window::CoreWindow<App>{hinst, {550, 50, 1200, 700}});
-
-    MessageBeep(5);
-    return 0;
-  };
-  void OnWindowActivate(_In_ const ::Window::ActivateArgs &args) noexcept
-  {
-
-    if (CoreApp::m_isVisible != args.isMinimized)
-    {
-      CoreApp::m_isVisible = args.isMinimized;
-      m_shouldDraw = !CoreApp::m_isVisible;
-    };
-  };
-
-  void OnKeyStroke(_In_ const ::Window::KeyEventArgs &args) noexcept
-  {
-    switch (args.virtualKey)
-    {
-      CASE(VK_ESCAPE, { CoreApp::Close(); });
-      CASE(VK_SPACE, { Renderer::m_timer.Switch(); });
-    }
-  };
-  void OnCursorMove(_In_ const ::Window::CursorArgs &args) noexcept {/*Log<File>::Write(args.pos.x, args.pos.y); */};
-  void OnCreate(_In_ const ::Window::CreationArgs &args) noexcept
-  {
-    HRESULT hr{};
-
-    SIZE RTSize{RECTWIDTH(args.rect), RECTHEIGHT(args.rect)};
-    m_pDeviceResource = std::make_unique<DeviceResource>(&m_pContext, &hr);
-    if (H_OK(hr))
-    {
-      // CreateSizeDependentDeviceResources is not called from here because of OnSizeChanged message being send automatically  after OnCreate's success
-      if (H_OK(hr = Renderer::Initialize()))
-      {
-        Renderer::SetPipeLine();
-#ifndef IMGUI_DISABLE
-        m_pImGui = std::make_unique<IMGUI::IMGUI>(m_handle, m_pDeviceResource->GetDevice().Get(), m_pContext.Get());
-#endif // IMGUI_DISABLE
-        return;
-      };
-    };
-
-    DBG_ONLY(
-        {
-          m_pDeviceResource->PullDebugMessage();
-        });
-    m_shouldClose = true;
-  };
-  void OnSizeChanged(_In_ const ::Window::SizeChangedArgs &args) noexcept
-  {
-    float newWidth{static_cast<float>(args.newSize.width)};
-    float newHeight{static_cast<float>(args.newSize.height)};
-
-    switch (args.changeType)
-    {
-      CASE(::Window::SizeChangedArgs::ChangeType::Minimized, {m_pDeviceResource->GetSwapChain()->SetFullscreenState(false, nullptr); break; });
-      CASE(::Window::SizeChangedArgs::ChangeType::Maximized, {m_pDeviceResource->GetSwapChain()->SetFullscreenState(true, nullptr); break; });
-    }
-    if (m_viewPort.Width == newWidth && m_viewPort.Height == newHeight)
-    {
-      return;
-    }
-    else
-    {
-      Renderer::m_viewPort.Width = newWidth;
-      Renderer::m_viewPort.Height = newHeight;
-      m_pDeviceResource->CreateSizeDependentDeviceResources(m_handle, m_viewPort, m_pContext.Get(), &m_pRenderTarget, &m_pRTV);
-      Renderer::UpdateViewPortSizeBuffer(newWidth, newHeight);
-    }
-  };
-
-  void Draw() noexcept
-  {
-
-    if (m_shouldDraw && !m_shouldClose)
-    {
-      Renderer::UpdateFrameBuffer();
-
-      Renderer::Draw();
-
-#ifndef IMGUI_DISABLE
-      m_pImGui->RenderFrame([&]()
-                            {
-                               
-                              ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-                              ImGui::ColorEdit3("clear color",  Renderer::m_RTVClearColor); // Edit 3 floats representing a color
-                              ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
-                              ImGui::End(); });
-#endif // IMGUI_DISABLE
-
-      H_FAIL(m_pDeviceResource->Present());
-    };
-    DBG_ONLY(m_pDeviceResource->DebugInterface::PullDebugMessage());
-  };
-
-  void OnClose() noexcept
-  {
-    /**
-     * You may not release a swap chain in full-screen mode
-     * because doing so may create thread contention (which
-     * will cause DXGI to raise a non-continuable exception).
-     */
-    m_pDeviceResource->GetSwapChain()->SetFullscreenState(false, nullptr);
-  };
-
-private:
-  bool m_shouldDraw{true};
-  bool m_shouldClose{false};
-#ifndef IMGUI_DISABLE
-  std::unique_ptr<IMGUI::IMGUI> m_pImGui{};
-#endif // IMGUI_DISABLE
-  template <class TCoreWindow>
-  friend int __stdcall peekRun(TCoreWindow &&window)
-  {
-    if (window.m_shouldClose)
+    App app{};
+    if (app.m_shouldClose)
     {
       Error<File>::Write(L"App Creation canceled");
       return 1;
     };
+   //lolez m_Gui{};
+   //InitWindow(RECT{200, 300, 500, 600}, &app, &m_Gui);
+   //m_Gui.init(app.m_target.GetDevice().Get(), app.m_target.GetContext().Get());
+     
 
-    ::MSG messages{};
-
-    while (messages.message != WM_QUIT)
+    while (PeekEvent(app) != WM_QUIT)
     {
+      app.m_target.Draw();
 
-      ::PeekMessageW(&messages, 0, 0, 0, PM_REMOVE);
-      ::TranslateMessage(&messages);
-      ::DispatchMessageW(&messages);
-
-      window.App::Draw();
+     //m_Gui.RenderFrame([&]()
+     //                  {
+     //                          ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+     //                        //  ImGui::ColorEdit3("clear color",  Renderer::m_RTVClearColor); // Edit 3 floats representing a color
+     //                          ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
+     //                          ImGui::End(); });
     };
-
+    MessageBeep(5);
     return 0;
   };
+  
+
+  bool m_shouldClose{false};
+
+protected:
+  bool m_shouldDraw{true};
+  bool m_isVisible{false};
+
+private:
+  TargetWnd m_target{};
 };
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;

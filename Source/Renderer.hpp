@@ -6,8 +6,9 @@
 
 class Renderer
 {
-
+public:
     const ::Microsoft::WRL::ComPtr<ID3D11DeviceContext> &GetContext() const { return m_pContext; };
+    const ::Microsoft::WRL::ComPtr<ID3D11Device> &GetDevice() const { return m_pDeviceResource->GetDevice(); };
     const ::Microsoft::WRL::ComPtr<ID3D11RenderTargetView> &GetRenderTargetView() const { return m_pRTV; };
 
 protected:

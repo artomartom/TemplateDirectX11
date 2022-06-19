@@ -32,9 +32,9 @@ HRESULT Renderer::Initialize()
         D3D11_INPUT_ELEMENT_DESC{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
-    if (H_FAIL(hr = m_pDeviceResource->CreateVertexShaderFromFile(L"Vertex.so", layoutDescs.data(), layoutDescs.size(), &m_pVertexShader, &m_pInputLayout)))
+    if (H_FAIL(hr = m_pDeviceResource->CreateVertexShaderFromFile(L"F://Dev//Projects//TemplateDirectX11//Vertex.so", layoutDescs.data(), layoutDescs.size(), &m_pVertexShader, &m_pInputLayout)))
         return hr;
-    if (H_FAIL(hr = m_pDeviceResource->CreatePixelShaderFromFile(L"Pixel.so", &m_pPixelShader)))
+    if (H_FAIL(hr = m_pDeviceResource->CreatePixelShaderFromFile(L"F://Dev//Projects//TemplateDirectX11//Pixel.so", &m_pPixelShader)))
         return hr;
 
     /**
